@@ -1,9 +1,11 @@
 package dto
 
+import "github.com/NOTMKW/DLLBEL/internal/models"
+
 type CreateRuleRequest struct {
 	Name       string            `json:"name" validate:"required"`
 	Conditions map[string]string `json:"conditions" validate:"required"`
-	Actions    []string          `json:"actions" validate:"required"`
+	Actions    []models.Action   `json:"actions" validate:"required"`
 	Enabled    bool              `json:"enabled"`
 	Priority   int               `json:"priority"`
 }
@@ -11,7 +13,7 @@ type CreateRuleRequest struct {
 type UpdateRuleRequest struct {
 	Name       string            `json:"name"`
 	Conditions map[string]string `json:"conditions"`
-	Actions    []string          `json:"actions"`
+	Actions    []models.Action   `json:"actions"`
 	Enabled    *bool             `json:"enabled"`
 	Priority   *int              `json:"priority"`
 }

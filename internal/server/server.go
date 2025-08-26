@@ -6,7 +6,6 @@ import (
 
 	"github.com/NOTMKW/DLLBEL/internal/config"
 	"github.com/NOTMKW/DLLBEL/internal/handlers"
-	"github.com/NOTMKW/DLLBEL/internal/models"
 	"github.com/NOTMKW/DLLBEL/internal/repository"
 	"github.com/NOTMKW/DLLBEL/internal/routes"
 	"github.com/NOTMKW/DLLBEL/internal/services"
@@ -18,22 +17,8 @@ import (
 type Server struct {
 	app          *fiber.App
 	config       *config.Config
-	eventService *services.WebSocketService
+	eventService *services.EventService
 	repo         *repository.RedisRepository
-}
-
-type WebSocketService struct {
-	eventChannel chan *models.MT5Event
-}
-
-func (s *WebSocketService) GetEventChannel() chan *models.MT5Event {
-	return s.eventChannel
-}
-
-func NewWebSocketService(eventChannel chan *models.MT5Event) *WebSocketService {
-	return &WebSocketService{
-		eventChannel: eventChannel,
-	}
 }
 
 func NewServer(cfg *config.Config) *Server {
@@ -57,14 +42,13 @@ func NewServer(cfg *config.Config) *Server {
 	ruleService := services.NewRuleService(repo)
 	userService := services.NewUserService(repo)
 	wsService := services.NewWebSocketService()
+	dllService := services.NewDLLService(nil)
 
-	eventService := services.NewWebSocketService()
-	dllService := services.NewDLLService(eventService.GetEventChannel())
-
-	eventService = services.NewWebSocketService(ruleService, userService, dllService, wsService, cfg.EventBuffer)
+	eventService := services.NewEventService(ruleService, userService, dllService, wsService, cfg.EventBuffer)
+	dllService.SetEventChannel(eventService.GetEventChannel())
 
 	wsHandler := handlers.NewWebSocketHandler(wsService)
-	adminHandler := handlers.NewAdminHandler(ruleService, userService, dllService, eventService)
+	adminHandler := handlers.NewAdminHandler(ruleService, wsService, dllService, userService)
 	dllHandler := handlers.NewDLLHandler(dllService)
 
 	routes.SetupRoutes(app, wsHandler, adminHandler, dllHandler)

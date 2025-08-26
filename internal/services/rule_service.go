@@ -78,25 +78,29 @@ func (s *RuleService) EvaluateRule (rule *models.Rule, event *models.MT5Event, s
 		case "max_volume":
 			if maxVol, err := strconv.ParseFloat(value, 64); err == nil {
 				if event.Volume > maxVol {
-				return false
+					return true
+				}
 			}
-		}
+			break
 		case "max_positions":
 			if maxPos, err := strconv.Atoi(value); err == nil {
 				if state.OpenPositions > maxPos {
 					return true
 				}
 			}
+			break
 		case "max_day_volume":
 			if maxDayVol, err := strconv.ParseFloat(value, 64); err == nil {
 				if state.DayVolume > maxDayVol {
 					return true
 				}
 			}
+			break
 		case "symbol_restricted":
 			if event.Symbol == value {
 				return true
 			}
+			break
 		}
 	}
 

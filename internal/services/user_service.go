@@ -37,15 +37,21 @@ func (s *UserService) GetUserState(userID string) *models.UserState {
 		return redisState
 	}
 
+	return nil
+}
+
+func (s *UserService) CreateUserState(userID string) *models.UserState {
 	newState := &models.UserState{
 		UserID:       userID,
 		CustomData:   make(map[string]string),
 		LastActivity: time.Now().Unix(),
 	}
-
 	s.mu.Lock()
 	s.states[userID] = newState
 	s.mu.Unlock()
+
+	go s.repo.SaveUserState(newState)
+
 	return newState
 }
 
@@ -89,8 +95,7 @@ func (s *UserService) UpdateUserState(userID string, req *dto.UpdateUserStateReq
 	return state
 }
 
-func (s *UserService) UpdateStateFromEvent(event *models.MT5Event) {
-	state := s.GetUserState(event.UserId)
+func (s *UserService) UpdateUserStateWithEvent(state *models.UserState, event *models.MT5Event) {
 	state.Mu.Lock()
 	defer state.Mu.Unlock()
 
@@ -99,8 +104,9 @@ func (s *UserService) UpdateStateFromEvent(event *models.MT5Event) {
 	switch event.EventType {
 	case "ORDER_OPEN":
 		state.DayVolume += event.Volume
-	case "ORDER_CLOSE":
 		state.OpenPositions += 1
+	case "ORDER_CLOSE":
+		state.OpenPositions -= 1
 	case "BALANCE_UPDATE":
 		state.Balance = event.Price
 	case "EQUITY_UPDATE":
