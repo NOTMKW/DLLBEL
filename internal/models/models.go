@@ -63,11 +63,16 @@ func NewEnforcementMessage(userID, action, reason string, severity int32) *Enfor
 	}
 }
 
+type Action struct {
+	Type     string `json:"type" redis:"type"`
+	Severity int32  `json:"severity" redis:"severity"`
+}
+
 type Rule struct {
 	ID         string            `json:"id" redis:"id"`
 	Name       string            `json:"name" redis:"name"`
 	Conditions map[string]string `json:"conditions" redis:"conditions"`
-	Actions    []string          `json:"actions" redis:"actions"`
+	Actions    []Action          `json:"actions" redis:"actions"`
 	Enabled    bool              `json:"enabled" redis:"enabled"`
 	Priority   int               `json:"priority" redis:"priority"`
 	CreatedAt  int64             `json:"created_at" redis:"created_at"`

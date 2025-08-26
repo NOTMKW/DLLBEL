@@ -25,6 +25,10 @@ func NewDLLService(eventChan chan *models.MT5Event) *DLLService {
 	}
 }
 
+func (s *DLLService) SetEventChannel(eventChan chan *models.MT5Event) {
+	s.eventChan = eventChan
+}
+
 func (s *DLLService) StartListener(dllID string) error {
 	listener, err := net.Listen("tcp", ":0")
 	if err != nil {
