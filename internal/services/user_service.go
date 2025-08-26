@@ -34,7 +34,7 @@ func (s *UserService) GetUserState(userID string) *models.UserState {
 		s.mu.Lock()
 		s.states[userID] = redisState
 		s.mu.Unlock()
-		return redisState, nil
+		return redisState
 	}
 
 	newState := &models.UserState{
@@ -49,10 +49,10 @@ func (s *UserService) GetUserState(userID string) *models.UserState {
 	return newState
 }
 
-func (s *UserService) UpdateUserState(userID string, req *dto.UpdateUserStateRequest) *models.UserStae {
+func (s *UserService) UpdateUserState(userID string, req *dto.UpdateUserStateRequest) *models.UserState {
 	state := s.GetUserState(userID)
-	state.mu.Lock()
-	defer state.mu.Unlock()
+	state.Mu.Lock()
+	defer state.Mu.Unlock()
 	if req.Balance != nil {
 		state.Balance = *req.Balance
 	}
@@ -91,8 +91,8 @@ func (s *UserService) UpdateUserState(userID string, req *dto.UpdateUserStateReq
 
 func (s *UserService) UpdateStateFromEvent(event *models.MT5Event) {
 	state := s.GetUserState(event.UserId)
-	state.mu.Lock()
-	defer state.mu.Unlock()
+	state.Mu.Lock()
+	defer state.Mu.Unlock()
 
 	state.LastActivity = time.Now().Unix()
 

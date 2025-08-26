@@ -39,9 +39,10 @@ func (h *AdminHandler) CreateRule(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"error": "Invalid JSON"})
 	}
 
+	rule, err := h.ruleService.CreateRule(&req)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
-		}
+	}
 	return c.JSON(rule)
 }
 
@@ -62,7 +63,7 @@ func (h *AdminHandler) UpdateRule(c *fiber.Ctx) error {
 func (h *AdminHandler) DeleteRule(c *fiber.Ctx) error {
 	id := c.Params("id")
 	
-	state := h.ruleService.DeleteRule(id)
+	h.ruleService.DeleteRule(id)
 	return c.JSON(fiber.Map{"message": "Rule deleted"})
 }
 

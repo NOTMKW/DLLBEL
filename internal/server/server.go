@@ -17,7 +17,7 @@ import (
 type Server struct {
 	app          *fiber.App
 	config       *config.Config
-	eventService *services.EventService
+	eventService *services.WebSocketService
 	repo         *repository.RedisRepository
 }
 
@@ -43,13 +43,13 @@ func NewServer(cfg *config.Config) *Server {
 	userService := services.NewUserService(repo)
 	wsService := services.NewWebSocketService()
 
-	eventService := services.NewWebSocketService(ruleService, userService, nil, wsService, cfg.EventBuffer)
-	dllService := services.NewDLLService(eventService.GetEventChannel())
+	eventService := services.NewWebSocketService()
+	dllService := services.NewDLLService(wsService.GetEventChannel())
 
 	eventService = services.NewWebSocketService(ruleService, userService, dllService, wsService, cfg.EventBuffer)
 
 	wsHandler := handlers.NewWebSocketHandler(wsService)
-	adminHandler := handlers.NewAdminHandler(ruleService, userService, dllService, wsService)
+	adminHandler := handlers.NewAdminHandler(ruleService, userService, dllService, eventService)
 	dllHandler := handlers.NewDLLHandler(dllService)
 
 	routes.SetupRoutes(app, wsHandler, adminHandler, dllHandler)

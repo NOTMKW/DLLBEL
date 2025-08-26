@@ -25,8 +25,8 @@ func (s *RuleService) CreateRule(req *dto.CreateRuleRequest) (*models.Rule, erro
 		Actions:    req.Actions,
 		Enabled:    req.Enabled,
 		Priority:   req.Priority,
-		CreatedAt:  time.Now(),
-		UpdatedAt:  time.Now(),
+		CreatedAt:  time.Now().UnixNano(),
+		UpdatedAt:  time.Now().UnixNano(),
 	}
 
 	if err := s.repo.SaveRule(rule); err != nil {
@@ -56,7 +56,7 @@ func (s *RuleService) UpdateRule(id string, req *dto.UpdateRuleRequest) (*models
 	if req.Priority != nil {
 		rule.Priority = *req.Priority
 	}
-	rule.UpdatedAt = time.Now()
+	rule.UpdatedAt = time.Now().UnixNano()
 
 	if err := s.repo.SaveRule(rule); err != nil {
 		return nil, err

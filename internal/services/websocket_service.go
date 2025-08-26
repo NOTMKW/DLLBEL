@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 	"sync"
 
+	"github.com/NOTMKW/DLLBEL/internal/dto"
+	"github.com/NOTMKW/DLLBEL/internal/models"
 	"github.com/gofiber/websocket/v2"
-	"DLLBEL/internal/models"
-	"DLLBEL/internal/dto"
 )
 
 type WebSocketService struct {
-	clients   map[string]*websocket.Conn
-	mu        sync.RWMutex
+	clients map[string]*websocket.Conn
+	mu      sync.RWMutex
 }
 
 func NewWebSocketService() *WebSocketService {
@@ -40,7 +40,7 @@ func (s *WebSocketService) SendMessage(id string, message interface{}) error {
 	conn, exists := s.clients[id]
 	s.mu.RUnlock()
 	if !exists {
-		return nil // or return an error indicating client not found
+		return nil
 	}
 
 	data, err := json.Marshal(message)
