@@ -6,6 +6,7 @@ import (
 
 	"github.com/NOTMKW/DLLBEL/internal/config"
 	"github.com/NOTMKW/DLLBEL/internal/handlers"
+	"github.com/NOTMKW/DLLBEL/internal/models"
 	"github.com/NOTMKW/DLLBEL/internal/repository"
 	"github.com/NOTMKW/DLLBEL/internal/routes"
 	"github.com/NOTMKW/DLLBEL/internal/services"
@@ -19,6 +20,20 @@ type Server struct {
 	config       *config.Config
 	eventService *services.WebSocketService
 	repo         *repository.RedisRepository
+}
+
+type WebSocketService struct {
+	eventChannel chan *models.MT5Event
+}
+
+func (s *WebSocketService) GetEventChannel() chan *models.MT5Event {
+	return s.eventChannel
+}
+
+func NewWebSocketService(eventChannel chan *models.MT5Event) *WebSocketService {
+	return &WebSocketService{
+		eventChannel: eventChannel,
+	}
 }
 
 func NewServer(cfg *config.Config) *Server {
@@ -44,7 +59,7 @@ func NewServer(cfg *config.Config) *Server {
 	wsService := services.NewWebSocketService()
 
 	eventService := services.NewWebSocketService()
-	dllService := services.NewDLLService(wsService.GetEventChannel())
+	dllService := services.NewDLLService(eventService.GetEventChannel())
 
 	eventService = services.NewWebSocketService(ruleService, userService, dllService, wsService, cfg.EventBuffer)
 

@@ -8,7 +8,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/NOTMKW/DLLBEL/internal/dto"
 	"github.com/NOTMKW/DLLBEL/internal/models"
 )
@@ -117,11 +116,10 @@ func (s *DLLService) parseBinaryProtocol(data []byte) []*models.MT5Event {
 		}
 
 		event := &models.MT5Event{}
-		if err := proto.Unmarshal(msgData, event); err != nil {
-			log.Printf("Failed to unmarshal protobuf: %v", err)
+		if err := event.Deserialize(msgData); err != nil {
+			log.Printf("Failed to deserialize MT5Event: %v", err)
 			continue
 		}
-
 		events = append(events, event)
 	}
 
@@ -150,7 +148,7 @@ func (s *DLLService) SendEnforcement(enforcement *models.EnforcementMessage) {
 
 func (s *DLLService) enforceWriter(dllConn *models.DLLConnection) {
 	for enforcement := range dllConn.EnforceChan {
-		data, err := proto.Marshal(enforcement)
+		data, err := enforcement.Serialize()
 		if err != nil {
 			continue
 		}

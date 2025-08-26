@@ -52,10 +52,10 @@ func (s *WebSocketService) SendMessage(id string, message interface{}) error {
 }
 
 func (s *WebSocketService) BroadcastEvent(event *models.MT5Event) {
-	message := dto.MT5EventMessage{
+	message := dto.WSMessage{
 		Type: "mt5_event",
 		Data: map[string]interface{}{
-			"user_id":    event.UserID,
+			"user_id":    event.UserId,
 			"event_type": event.EventType,
 			"symbol":     event.Symbol,
 			"volume":     event.Volume,
@@ -68,7 +68,7 @@ func (s *WebSocketService) BroadcastEvent(event *models.MT5Event) {
 }
 
 func (s *WebSocketService) SendEnforcement(enforcement *models.EnforcementMessage) {
-	message := dto.EnforcementMessage{
+	message := dto.WSMessage{
 		Type: "enforcement",
 		Data: map[string]interface{}{
 			"user_id":   enforcement.UserId,

@@ -3,26 +3,64 @@ package models
 import (
 	"net"
 	"sync"
+	"time"
+	"encoding/json"
 
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type MT5Event struct {
-	UserId    string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,porto3" json:"user_id,omitempty"`
-	EventType string                 `protobuf:"bytes,2,opt,name=event_type,json=eventType,proto3" json:"event_type,omitempty"`
-	Symbol    string                 `protobuf:"bytes,3,opt,name=symbol,proto3" json:"symbol,omitempty"`
-	Volume    float64                `protobuf:"fixed64,4,opt,name=volume,proto3" json:"volume,omitempty"`
-	Price     float64                `protobuf:"fixed64,5,opt,name=price,proto3" json:"price,omitempty"`
-	Timestamp *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
-	Data      []byte                 `protobuf:"bytes,7,opt,name=data,proto3" json:"data,omitempty"`
+	UserId    string    `json:"user_id"`
+	EventType string    `json:"event_type"`
+	Symbol    string    `json:"symbol"`
+	Volume    float64   `json:"volume"`
+	Price     float64   `json:"price"`
+	Timestamp int64     `json:"timestamp"`
+	Data      []byte    `json:"data,omitempty"`
 }
 
 type EnforcementMessage struct {
-	UserId    string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Action    string `protobuf:"bytes,2,opt,name=action,proto3" json:"action,omitempty"`
-	Reason    string `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`
-	Severity  int32  `protobuf:"varint,4,opt,name=severity,proto3" json:"severity,omitempty"`
-	Timestamp int64  `protobuf:"varint,5,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	UserId    string `json:"user_id"`
+	Action    string `json:"action"`
+	Reason    string `json:"reason"`
+	Severity  int32  `json:"severity"`
+	Timestamp int64  `json:"timestamp"`
+}
+
+func (e *MT5Event) Serialize() ([]byte, error) {
+	return json.Marshal(e)
+}
+
+func (e *MT5Event) Deserialize(data []byte) error {
+	return json.Unmarshal(data, e)
+}
+
+func (e *EnforcementMessage) Serialize() ([]byte, error) {
+	return json.Marshal(e)
+}
+
+func (e *EnforcementMessage) Deserialize(data []byte) error {
+	return json.Unmarshal(data, e)
+}
+
+func NewMT5Event(userID, eventType, symbol string, volume, price float64) *MT5Event {
+	return &MT5Event{
+		UserId:    userID,
+		EventType: eventType,
+		Symbol:    symbol,
+		Volume:    volume,
+		Price:     price,
+		Timestamp: time.Now().Unix(),
+	}
+}
+
+func NewEnforcementMessage(userID, action, reason string, severity int32) *EnforcementMessage {
+	return &EnforcementMessage{
+		UserId:    userID,
+		Action:    action,
+		Reason:    reason,
+		Severity:  severity,
+		Timestamp: time.Now().Unix(),
+	}
 }
 
 type Rule struct {
